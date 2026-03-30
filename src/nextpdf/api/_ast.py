@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from ..models.ast import (
         AstDocument,
         CitedTextBlock,
+        ExtractCitedTablesResponse,
+        GetAstDiffResponse,
         GetAstNodeResponse,
         SearchAstNodesResponse,
     )
@@ -99,4 +101,36 @@ class AstAPI:
                 text_query=text_query,
                 max_results=max_results,
             )
+        )
+
+    def extract_cited_tables(
+        self,
+        pdf_data: bytes,
+        *,
+        page_range: dict[str, int] | None = None,
+    ) -> ExtractCitedTablesResponse:
+        """
+        Extract all tables from a PDF with citation anchors (synchronous).
+
+        See AsyncAstAPI.extract_cited_tables for full documentation.
+        """
+        return asyncio.run(
+            self._async.extract_cited_tables(
+                pdf_data,
+                page_range=page_range,
+            )
+        )
+
+    def get_ast_diff(
+        self,
+        original_pdf_data: bytes,
+        modified_pdf_data: bytes,
+    ) -> GetAstDiffResponse:
+        """
+        Compare two PDFs and return structural AST differences (synchronous).
+
+        See AsyncAstAPI.get_ast_diff for full documentation.
+        """
+        return asyncio.run(
+            self._async.get_ast_diff(original_pdf_data, modified_pdf_data)
         )
