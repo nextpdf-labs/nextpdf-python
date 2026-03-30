@@ -6,7 +6,12 @@ import asyncio
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..models.ast import AstDocument, CitedTextBlock
+    from ..models.ast import (
+        AstDocument,
+        CitedTextBlock,
+        GetAstNodeResponse,
+        SearchAstNodesResponse,
+    )
     from ._ast_async import AsyncAstAPI
 
 
@@ -55,5 +60,43 @@ class AstAPI:
                 pdf_data,
                 page_index=page_index,
                 headings_only=headings_only,
+            )
+        )
+
+    def get_ast_node(
+        self,
+        pdf_data: bytes,
+        node_id: str,
+    ) -> GetAstNodeResponse:
+        """
+        Retrieve a single AST node by its node ID (synchronous).
+
+        See AsyncAstAPI.get_ast_node for full documentation.
+        """
+        return asyncio.run(
+            self._async.get_ast_node(pdf_data, node_id)
+        )
+
+    def search_ast_nodes(
+        self,
+        pdf_data: bytes,
+        *,
+        node_type: str | None = None,
+        page_index: int | None = None,
+        text_query: str | None = None,
+        max_results: int = 100,
+    ) -> SearchAstNodesResponse:
+        """
+        Search AST nodes by type, page, or text content (synchronous).
+
+        See AsyncAstAPI.search_ast_nodes for full documentation.
+        """
+        return asyncio.run(
+            self._async.search_ast_nodes(
+                pdf_data,
+                node_type=node_type,
+                page_index=page_index,
+                text_query=text_query,
+                max_results=max_results,
             )
         )

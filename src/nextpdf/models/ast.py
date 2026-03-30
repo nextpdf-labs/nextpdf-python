@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class NodeType(str, Enum):
@@ -104,3 +104,46 @@ class CitedTextBlock(BaseModel):
     chunk_index: int | None = None
     # depth is present in the UntaggedFallbackBuilder path only
     depth: int | None = Field(default=None, ge=0)
+
+
+class AstNodeMeta(BaseModel):
+    """Metadata returned with AST tool responses (ETag, metering)."""
+
+    etag: str | None = None
+    pages_processed: int | None = None
+
+    model_config = ConfigDict(frozen=True)
+
+
+class AstNodeShallow(BaseModel):
+    """Shallow node representation from search results (no deep children)."""
+
+    id: str
+    type: NodeType
+    page_index: int
+    bbox: BoundingBox | None = None
+    text_content: str | None = None
+    attributes: dict[str, Any] = Field(default_factory=dict)
+    children_count: int = 0
+
+    model_config = ConfigDict(frozen=True)
+
+
+class GetAstNodeResponse(BaseModel):
+    """Response from get_ast_node."""
+
+    node: AstNode
+    meta: AstNodeMeta = Field(default_factory=AstNodeMeta)
+
+    model_config = ConfigDict(frozen=True)
+
+
+class SearchAstNodesResponse(BaseModel):
+    """Response from search_ast_nodes."""
+
+    nodes: list[AstNodeShallow]
+    total_matches: int
+    truncated: bool = False
+    meta: AstNodeMeta = Field(default_factory=AstNodeMeta)
+
+    model_config = ConfigDict(frozen=True)
