@@ -147,3 +147,74 @@ class SearchAstNodesResponse(BaseModel):
     meta: AstNodeMeta = Field(default_factory=AstNodeMeta)
 
     model_config = ConfigDict(frozen=True)
+
+
+class CitedTableCell(BaseModel):
+    """A single cell within a cited table block."""
+
+    model_config = ConfigDict(frozen=True)
+
+    row: int
+    col: int
+    row_span: int = 1
+    col_span: int = 1
+    text: str | None
+    bbox: BoundingBox | None
+    confidence: float
+
+
+class CitedTableBlock(BaseModel):
+    """A table extracted from a PDF page with its citation anchor."""
+
+    model_config = ConfigDict(frozen=True)
+
+    table_node_id: str
+    page_index: int
+    citation_anchor: CitationAnchor | None
+    row_count: int
+    col_count: int
+    rows: list[list[CitedTableCell]]
+
+
+class ExtractCitedTablesResponse(BaseModel):
+    """Response from extract_cited_tables."""
+
+    model_config = ConfigDict(frozen=True)
+
+    tables: list[CitedTableBlock]
+    table_count: int
+    pages_processed: int | None = None
+
+
+class AstDiffEntry(BaseModel):
+    """A single entry in the AST diff between two PDF versions."""
+
+    model_config = ConfigDict(frozen=True)
+
+    type: str  # "added" | "removed" | "changed"
+    node_id: str
+    node_type: str
+    page_index: int
+    text_preview: str | None = None
+
+
+class AstDiffSummary(BaseModel):
+    """Aggregate counts from an AST diff operation."""
+
+    model_config = ConfigDict(frozen=True)
+
+    added_node_count: int
+    removed_node_count: int
+    changed_node_count: int
+
+
+class GetAstDiffResponse(BaseModel):
+    """Response from get_ast_diff."""
+
+    model_config = ConfigDict(frozen=True)
+
+    original_page_count: int
+    modified_page_count: int
+    summary: AstDiffSummary
+    diff: list[AstDiffEntry]
+    pages_processed: int | None = None

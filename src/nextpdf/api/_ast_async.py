@@ -10,9 +10,14 @@ import httpx
 from .._http import DEFAULT_TIMEOUT, build_request_headers, raise_for_error_response
 from ..models.ast import (
     AstDocument,
+    AstDiffEntry,
+    AstDiffSummary,
     AstNode,
     AstNodeMeta,
+    CitedTableBlock,
     CitedTextBlock,
+    ExtractCitedTablesResponse,
+    GetAstDiffResponse,
     GetAstNodeResponse,
     SearchAstNodesResponse,
 )
@@ -211,4 +216,82 @@ class AsyncAstAPI:
                 "truncated": raw.get("truncated", False),
                 "meta": self._parse_meta(raw),
             }
+        )
+
+    async def extract_cited_tables(
+        self,
+        pdf_data: bytes,
+        *,
+        page_range: dict[str, int] | None = None,
+    ) -> ExtractCitedTablesResponse:
+        """Extract all tables from a PDF with citation anchors.
+
+        Args:
+            pdf_data: Raw PDF bytes.
+            page_range: Optional dict with 'start' and 'end' page indices (0-based).
+
+        Returns:
+            ExtractCitedTablesResponse with table matrix and citation anchors.
+        """
+        payload: dict[str, object] = {
+            "pdf_data": base64.b64encode(pdf_data).decode("ascii"),
+        }
+        if page_range is not None:
+            payload["page_range"] = page_range
+
+        async with httpx.AsyncClient(
+            headers=build_request_headers(self._client.api_key),
+            timeout=DEFAULT_TIMEOUT,
+        ) as http:
+            response = await http.post(
+                f"{self._client.base_url}/v1/tools/extract_cited_tables",
+                json=payload,
+            )
+
+        raise_for_error_response(response)
+        raw: dict[str, Any] = response.json()
+        meta = self._parse_meta(raw)
+        return ExtractCitedTablesResponse(
+            tables=[CitedTableBlock.model_validate(t) for t in raw.get("tables", [])],
+            table_count=raw.get("table_count", 0),
+            pages_processed=meta.pages_processed,
+        )
+
+    async def get_ast_diff(
+        self,
+        original_pdf_data: bytes,
+        modified_pdf_data: bytes,
+    ) -> GetAstDiffResponse:
+        """Compare two PDFs and return structural AST differences.
+
+        Args:
+            original_pdf_data: Raw bytes of the original PDF.
+            modified_pdf_data: Raw bytes of the modified PDF.
+
+        Returns:
+            GetAstDiffResponse with added/removed/changed node summary.
+        """
+        payload: dict[str, object] = {
+            "original_pdf_data": base64.b64encode(original_pdf_data).decode("ascii"),
+            "modified_pdf_data": base64.b64encode(modified_pdf_data).decode("ascii"),
+        }
+
+        async with httpx.AsyncClient(
+            headers=build_request_headers(self._client.api_key),
+            timeout=DEFAULT_TIMEOUT,
+        ) as http:
+            response = await http.post(
+                f"{self._client.base_url}/v1/tools/get_ast_diff",
+                json=payload,
+            )
+
+        raise_for_error_response(response)
+        raw = response.json()
+        meta = self._parse_meta(raw)
+        return GetAstDiffResponse(
+            original_page_count=raw["original_page_count"],
+            modified_page_count=raw["modified_page_count"],
+            summary=AstDiffSummary.model_validate(raw["summary"]),
+            diff=[AstDiffEntry.model_validate(e) for e in raw.get("diff", [])],
+            pages_processed=meta.pages_processed,
         )

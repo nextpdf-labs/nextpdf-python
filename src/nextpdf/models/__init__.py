@@ -1,13 +1,19 @@
 """NextPDF data models."""
 
 from .ast import (
+    AstDiffEntry,
+    AstDiffSummary,
     AstDocument,
     AstNode,
     AstNodeMeta,
     AstNodeShallow,
     BoundingBox,
     CitationAnchor,
+    CitedTableBlock,
+    CitedTableCell,
     CitedTextBlock,
+    ExtractCitedTablesResponse,
+    GetAstDiffResponse,
     GetAstNodeResponse,
     NodeType,
     SearchAstNodesResponse,
@@ -23,6 +29,8 @@ from .errors import (
 
 __all__ = [
     "AstBuildTimeoutError",
+    "AstDiffEntry",
+    "AstDiffSummary",
     "AstDocument",
     "AstNoStructTreeError",
     "AstNode",
@@ -30,7 +38,11 @@ __all__ = [
     "AstNodeShallow",
     "BoundingBox",
     "CitationAnchor",
+    "CitedTableBlock",
+    "CitedTableCell",
     "CitedTextBlock",
+    "ExtractCitedTablesResponse",
+    "GetAstDiffResponse",
     "GetAstNodeResponse",
     "NextPDFAPIError",
     "NextPDFError",
