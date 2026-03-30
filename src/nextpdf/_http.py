@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import platform
+import sys
 from typing import Any
 
 import httpx
@@ -16,7 +18,8 @@ from .models.errors import (
 
 DEFAULT_TIMEOUT = httpx.Timeout(60.0, connect=10.0)
 DEFAULT_RETRIES = 3
-USER_AGENT = "nextpdf-python/0.1.0"
+_PY_VERSION = f"{sys.version_info.major}.{sys.version_info.minor}"
+USER_AGENT = f"nextpdf-python/0.1.0 (python {_PY_VERSION})"
 
 __all__ = [
     "DEFAULT_RETRIES",
