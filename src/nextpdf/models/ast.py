@@ -100,4 +100,7 @@ class CitedTextBlock(BaseModel):
     text: str
     citation: CitationAnchor
     node_type: str | None = None
-    depth: int = Field(ge=0)
+    # chunk_index is present in the Pro CitedTextExtractor path
+    chunk_index: int | None = None
+    # depth is present in the UntaggedFallbackBuilder path only
+    depth: int | None = Field(default=None, ge=0)

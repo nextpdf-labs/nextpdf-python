@@ -199,3 +199,42 @@ class TestCitedTextBlock:
                 ),
                 depth=-1,
             )
+
+    def test_depth_is_optional(self) -> None:
+        block = CitedTextBlock(
+            text="Pro path block.",
+            citation=CitationAnchor(
+                node_id="n-1",
+                page_index=0,
+                bbox=BoundingBox(x=0.0, y=0.0, width=0.5, height=0.1),
+                confidence=0.95,
+            ),
+        )
+        assert block.depth is None
+
+    def test_chunk_index_is_optional(self) -> None:
+        block = CitedTextBlock(
+            text="Fallback path block.",
+            citation=CitationAnchor(
+                node_id="n-2",
+                page_index=1,
+                bbox=BoundingBox(x=0.0, y=0.1, width=0.5, height=0.1),
+                confidence=0.3,
+            ),
+            depth=0,
+        )
+        assert block.chunk_index is None
+
+    def test_chunk_index_can_be_set(self) -> None:
+        block = CitedTextBlock(
+            text="Chunked block.",
+            citation=CitationAnchor(
+                node_id="n-3",
+                page_index=0,
+                bbox=BoundingBox(x=0.0, y=0.2, width=0.8, height=0.05),
+                confidence=0.92,
+            ),
+            chunk_index=5,
+        )
+        assert block.chunk_index == 5
+        assert block.depth is None
