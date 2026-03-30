@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Type checking caches
+.mypy_cache/
+.pyright/
+
+# pytest
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+*.sw[po]
+
+# OS
+.DS_Store
+Thumbs.db
