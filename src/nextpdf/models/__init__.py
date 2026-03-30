@@ -3,10 +3,14 @@
 from .ast import (
     AstDocument,
     AstNode,
+    AstNodeMeta,
+    AstNodeShallow,
     BoundingBox,
     CitationAnchor,
     CitedTextBlock,
+    GetAstNodeResponse,
     NodeType,
+    SearchAstNodesResponse,
 )
 from .errors import (
     AstBuildTimeoutError,
@@ -22,12 +26,16 @@ __all__ = [
     "AstDocument",
     "AstNoStructTreeError",
     "AstNode",
+    "AstNodeMeta",
+    "AstNodeShallow",
     "BoundingBox",
     "CitationAnchor",
     "CitedTextBlock",
+    "GetAstNodeResponse",
     "NextPDFAPIError",
     "NextPDFError",
     "NextPDFLicenseError",
     "NodeType",
     "QuotaExceededError",
+    "SearchAstNodesResponse",
 ]
