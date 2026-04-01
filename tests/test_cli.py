@@ -12,14 +12,12 @@ from nextpdf._version import __version__
 from nextpdf.cli import main
 from nextpdf.models.ast import (
     AstDocument,
-    AstNode,
     BoundingBox,
     CitationAnchor,
     CitedTableBlock,
     CitedTableCell,
     CitedTextBlock,
     ExtractCitedTablesResponse,
-    NodeType,
 )
 
 

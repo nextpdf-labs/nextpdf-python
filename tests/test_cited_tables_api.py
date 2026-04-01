@@ -8,6 +8,7 @@ import json
 import httpx
 import pytest
 import respx
+from pydantic import ValidationError
 
 from nextpdf import AsyncNextPDF, NextPDF
 from nextpdf.models.ast import (
@@ -354,7 +355,7 @@ class TestModelFrozen:
             bbox=None,
             confidence=0.9,
         )
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             cell.text = "mutated"  # type: ignore[misc]
 
     def test_cited_table_block_model_frozen(self) -> None:
@@ -367,13 +368,13 @@ class TestModelFrozen:
             col_count=0,
             rows=[],
         )
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             block.row_count = 5  # type: ignore[misc]
 
     def test_extract_cited_tables_response_frozen(self) -> None:
         """ExtractCitedTablesResponse is immutable (frozen=True)."""
         resp = ExtractCitedTablesResponse(tables=[], table_count=0)
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             resp.table_count = 99  # type: ignore[misc]
 
     def test_ast_diff_entry_model_frozen(self) -> None:
@@ -384,7 +385,7 @@ class TestModelFrozen:
             node_type="paragraph",
             page_index=0,
         )
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             entry.type = "removed"  # type: ignore[misc]
 
     def test_get_ast_diff_response_frozen(self) -> None:
@@ -400,5 +401,5 @@ class TestModelFrozen:
             summary=summary,
             diff=[],
         )
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             resp.original_page_count = 99  # type: ignore[misc]
