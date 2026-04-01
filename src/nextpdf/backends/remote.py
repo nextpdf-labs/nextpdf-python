@@ -72,8 +72,8 @@ class RemoteBackend:
         if not isinstance(raw, dict):
             return AstNodeMeta()
         return AstNodeMeta(
-            etag=raw.get("etag"),
-            pages_processed=raw.get("pages_processed"),
+            etag=raw.get("etag"),  # pyright: ignore[reportUnknownArgumentType,reportUnknownMemberType]
+            pages_processed=raw.get("pages_processed"),  # pyright: ignore[reportUnknownArgumentType,reportUnknownMemberType]
         )
 
     # -- PdfBackend protocol methods ------------------------------------------

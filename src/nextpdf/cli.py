@@ -66,9 +66,9 @@ def _configure_logging(level_name: str) -> None:
 def _serialize_pydantic(obj: object) -> object:
     """Convert a pydantic model (or list of models) to JSON-serialisable dicts."""
     if isinstance(obj, list):
-        return [_serialize_pydantic(item) for item in obj]
+        return [_serialize_pydantic(item) for item in obj]  # pyright: ignore[reportUnknownArgumentType,reportUnknownVariableType]
     if hasattr(obj, "model_dump"):
-        return obj.model_dump(mode="json")
+        return obj.model_dump(mode="json")  # pyright: ignore[reportAttributeAccessIssue,reportUnknownMemberType,reportUnknownVariableType]
     return obj
 
 
