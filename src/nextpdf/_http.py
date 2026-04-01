@@ -1,4 +1,4 @@
-"""HTTP transport layer with retry and timeout handling."""
+"""HTTP transport layer with timeout handling and error mapping."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from typing import Any
 
 import httpx
 
+from ._version import __version__
 from .models.errors import (
     AstBuildTimeoutError,
     AstNoStructTreeError,
@@ -16,12 +17,10 @@ from .models.errors import (
 )
 
 DEFAULT_TIMEOUT = httpx.Timeout(60.0, connect=10.0)
-DEFAULT_RETRIES = 3
 _PY_VERSION = f"{sys.version_info.major}.{sys.version_info.minor}"
-USER_AGENT = f"nextpdf-python/0.1.0 (python {_PY_VERSION})"
+USER_AGENT = f"nextpdf-python/{__version__} (python {_PY_VERSION})"
 
 __all__ = [
-    "DEFAULT_RETRIES",
     "DEFAULT_TIMEOUT",
     "USER_AGENT",
     "build_request_headers",

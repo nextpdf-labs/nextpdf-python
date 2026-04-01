@@ -26,26 +26,22 @@ class NextPDFAPIError(NextPDFError):
 
 
 class NextPDFLicenseError(NextPDFAPIError):
-    """Operation requires a higher-tier license."""
-
-    UPGRADE_URL = "https://nextpdf.dev/pricing"
+    """Remote server returned HTTP 402 — feature requires a higher-tier license on the server."""
 
     def __init__(self, message: str) -> None:
         super().__init__(
-            f"{message}\nUpgrade at: {self.UPGRADE_URL}",
+            message,
             status_code=402,
             error_code="license/tier-required",
         )
 
 
 class QuotaExceededError(NextPDFAPIError):
-    """Rate limit or quota exceeded."""
-
-    PRICING_URL = "https://nextpdf.dev/pricing"
+    """Rate limit or quota exceeded on the remote server."""
 
     def __init__(self, message: str, *, retry_after: int | None = None) -> None:
         super().__init__(
-            f"{message}\nSee: {self.PRICING_URL}",
+            message,
             status_code=429,
             error_code="quota/exceeded",
         )
@@ -53,11 +49,11 @@ class QuotaExceededError(NextPDFAPIError):
 
 
 class AstNoStructTreeError(NextPDFAPIError):
-    """PDF has no StructTree (untagged), heuristic not enabled."""
+    """PDF has no StructTree (untagged) and heuristic fallback is not available."""
 
     def __init__(self) -> None:
         super().__init__(
-            "PDF has no structure tree. Use heuristic=True for untagged PDFs (Pro tier).",
+            "PDF has no structure tree. Enable heuristic mode for untagged PDFs.",
             status_code=422,
             error_code="ast/no-struct-tree",
         )

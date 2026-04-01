@@ -1,36 +1,26 @@
-"""Async AST API methods."""
+"""Async AST API methods — delegates to PdfBackend."""
 
 from __future__ import annotations
 
-import base64
-from typing import TYPE_CHECKING, Any
-
-import httpx
-
-from .._http import DEFAULT_TIMEOUT, build_request_headers, raise_for_error_response
-from ..models.ast import (
-    AstDocument,
-    AstDiffEntry,
-    AstDiffSummary,
-    AstNode,
-    AstNodeMeta,
-    CitedTableBlock,
-    CitedTextBlock,
-    ExtractCitedTablesResponse,
-    GetAstDiffResponse,
-    GetAstNodeResponse,
-    SearchAstNodesResponse,
-)
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .._async_client import AsyncNextPDF
+    from ..backends.protocol import PdfBackend
+    from ..models.ast import (
+        AstDocument,
+        CitedTextBlock,
+        ExtractCitedTablesResponse,
+        GetAstDiffResponse,
+        GetAstNodeResponse,
+        SearchAstNodesResponse,
+    )
 
 
 class AsyncAstAPI:
-    """Async wrapper for AST endpoints."""
+    """Async wrapper for AST endpoints — delegates to a PdfBackend."""
 
-    def __init__(self, client: AsyncNextPDF) -> None:
-        self._client = client
+    def __init__(self, backend: PdfBackend) -> None:
+        self._backend = backend
 
     async def get_document_ast(
         self,
@@ -54,30 +44,15 @@ class AsyncAstAPI:
 
         Raises:
             AstNoStructTreeError: PDF is untagged and heuristic not enabled.
-            NextPDFLicenseError: Requires Pro or higher tier.
+            NextPDFLicenseError: Feature requires a higher-tier license on the remote server.
             QuotaExceededError: Daily page limit exceeded.
         """
-        payload: dict[str, object] = {
-            "pdf_data": base64.b64encode(pdf_data).decode(),
-        }
-        if page_range_start is not None:
-            payload["page_range_start"] = page_range_start
-        if page_range_end is not None:
-            payload["page_range_end"] = page_range_end
-        if token_budget is not None:
-            payload["token_budget"] = token_budget
-
-        async with httpx.AsyncClient(
-            headers=build_request_headers(self._client.api_key),
-            timeout=DEFAULT_TIMEOUT,
-        ) as http:
-            response = await http.post(
-                f"{self._client.base_url}/v1/ast/document",
-                json=payload,
-            )
-
-        raise_for_error_response(response)
-        return AstDocument.model_validate(response.json())
+        return await self._backend.get_document_ast(
+            pdf_data,
+            page_range_start=page_range_start,
+            page_range_end=page_range_end,
+            token_budget=token_budget,
+        )
 
     async def extract_cited_text(
         self,
@@ -97,35 +72,10 @@ class AsyncAstAPI:
         Returns:
             List of CitedTextBlock objects, each with a citation anchor.
         """
-        payload: dict[str, object] = {
-            "pdf_data": base64.b64encode(pdf_data).decode(),
-        }
-        if page_index is not None:
-            payload["page_index"] = page_index
-        if headings_only:
-            payload["headings_only"] = True
-
-        async with httpx.AsyncClient(
-            headers=build_request_headers(self._client.api_key),
-            timeout=DEFAULT_TIMEOUT,
-        ) as http:
-            response = await http.post(
-                f"{self._client.base_url}/v1/ast/extract-cited-text",
-                json=payload,
-            )
-
-        raise_for_error_response(response)
-        data: dict[str, list[dict[str, object]]] = response.json()
-        return [CitedTextBlock.model_validate(block) for block in data.get("blocks", [])]
-
-    def _parse_meta(self, data: dict[str, Any]) -> AstNodeMeta:
-        """Extract _meta block from response data."""
-        raw = data.get("_meta", {})
-        if not isinstance(raw, dict):
-            return AstNodeMeta()
-        return AstNodeMeta(
-            etag=raw.get("etag"),
-            pages_processed=raw.get("pages_processed"),
+        return await self._backend.extract_cited_text(
+            pdf_data,
+            page_index=page_index,
+            headings_only=headings_only,
         )
 
     async def get_ast_node(
@@ -145,26 +95,7 @@ class AsyncAstAPI:
         Raises:
             NextPDFError: If the node is not found or request fails.
         """
-        payload: dict[str, object] = {
-            "pdf_data": base64.b64encode(pdf_data).decode(),
-            "node_id": node_id,
-        }
-
-        async with httpx.AsyncClient(
-            headers=build_request_headers(self._client.api_key),
-            timeout=DEFAULT_TIMEOUT,
-        ) as http:
-            response = await http.post(
-                f"{self._client.base_url}/v1/ast/node",
-                json=payload,
-            )
-
-        raise_for_error_response(response)
-        raw: dict[str, Any] = response.json()
-        return GetAstNodeResponse(
-            node=AstNode.model_validate(raw["node"]),
-            meta=self._parse_meta(raw),
-        )
+        return await self._backend.get_ast_node(pdf_data, node_id)
 
     async def search_ast_nodes(
         self,
@@ -187,35 +118,12 @@ class AsyncAstAPI:
         Returns:
             SearchAstNodesResponse with matching nodes list.
         """
-        payload: dict[str, object] = {
-            "pdf_data": base64.b64encode(pdf_data).decode(),
-            "max_results": max_results,
-        }
-        if node_type is not None:
-            payload["node_type"] = node_type
-        if page_index is not None:
-            payload["page_index"] = page_index
-        if text_query is not None:
-            payload["text_query"] = text_query
-
-        async with httpx.AsyncClient(
-            headers=build_request_headers(self._client.api_key),
-            timeout=DEFAULT_TIMEOUT,
-        ) as http:
-            response = await http.post(
-                f"{self._client.base_url}/v1/ast/search",
-                json=payload,
-            )
-
-        raise_for_error_response(response)
-        raw = response.json()
-        return SearchAstNodesResponse.model_validate(
-            {
-                "nodes": raw.get("nodes", []),
-                "total_matches": raw.get("total_matches", 0),
-                "truncated": raw.get("truncated", False),
-                "meta": self._parse_meta(raw),
-            }
+        return await self._backend.search_ast_nodes(
+            pdf_data,
+            node_type=node_type,
+            page_index=page_index,
+            text_query=text_query,
+            max_results=max_results,
         )
 
     async def extract_cited_tables(
@@ -233,28 +141,9 @@ class AsyncAstAPI:
         Returns:
             ExtractCitedTablesResponse with table matrix and citation anchors.
         """
-        payload: dict[str, object] = {
-            "pdf_data": base64.b64encode(pdf_data).decode("ascii"),
-        }
-        if page_range is not None:
-            payload["page_range"] = page_range
-
-        async with httpx.AsyncClient(
-            headers=build_request_headers(self._client.api_key),
-            timeout=DEFAULT_TIMEOUT,
-        ) as http:
-            response = await http.post(
-                f"{self._client.base_url}/v1/tools/extract_cited_tables",
-                json=payload,
-            )
-
-        raise_for_error_response(response)
-        raw: dict[str, Any] = response.json()
-        meta = self._parse_meta(raw)
-        return ExtractCitedTablesResponse(
-            tables=[CitedTableBlock.model_validate(t) for t in raw.get("tables", [])],
-            table_count=raw.get("table_count", 0),
-            pages_processed=meta.pages_processed,
+        return await self._backend.extract_cited_tables(
+            pdf_data,
+            page_range=page_range,
         )
 
     async def get_ast_diff(
@@ -271,27 +160,4 @@ class AsyncAstAPI:
         Returns:
             GetAstDiffResponse with added/removed/changed node summary.
         """
-        payload: dict[str, object] = {
-            "original_pdf_data": base64.b64encode(original_pdf_data).decode("ascii"),
-            "modified_pdf_data": base64.b64encode(modified_pdf_data).decode("ascii"),
-        }
-
-        async with httpx.AsyncClient(
-            headers=build_request_headers(self._client.api_key),
-            timeout=DEFAULT_TIMEOUT,
-        ) as http:
-            response = await http.post(
-                f"{self._client.base_url}/v1/tools/get_ast_diff",
-                json=payload,
-            )
-
-        raise_for_error_response(response)
-        raw = response.json()
-        meta = self._parse_meta(raw)
-        return GetAstDiffResponse(
-            original_page_count=raw["original_page_count"],
-            modified_page_count=raw["modified_page_count"],
-            summary=AstDiffSummary.model_validate(raw["summary"]),
-            diff=[AstDiffEntry.model_validate(e) for e in raw.get("diff", [])],
-            pages_processed=meta.pages_processed,
-        )
+        return await self._backend.get_ast_diff(original_pdf_data, modified_pdf_data)

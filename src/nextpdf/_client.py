@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from ._async_client import AsyncNextPDF
 from .api._ast import AstAPI
-from .api._ast_async import AsyncAstAPI
 
 
 class NextPDF:
@@ -29,4 +28,4 @@ class NextPDF:
             api_key=api_key,
             api_version=api_version,
         )
-        self.ast = AstAPI(AsyncAstAPI(self._async))
+        self.ast = AstAPI(self._async.ast)

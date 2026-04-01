@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING
+
+from .._sync import run_sync
 
 if TYPE_CHECKING:
     from ..models.ast import (
@@ -36,7 +37,7 @@ class AstAPI:
 
         See AsyncAstAPI.get_document_ast for full documentation.
         """
-        return asyncio.run(
+        return run_sync(
             self._async.get_document_ast(
                 pdf_data,
                 page_range_start=page_range_start,
@@ -57,7 +58,7 @@ class AstAPI:
 
         See AsyncAstAPI.extract_cited_text for full documentation.
         """
-        return asyncio.run(
+        return run_sync(
             self._async.extract_cited_text(
                 pdf_data,
                 page_index=page_index,
@@ -75,9 +76,7 @@ class AstAPI:
 
         See AsyncAstAPI.get_ast_node for full documentation.
         """
-        return asyncio.run(
-            self._async.get_ast_node(pdf_data, node_id)
-        )
+        return run_sync(self._async.get_ast_node(pdf_data, node_id))
 
     def search_ast_nodes(
         self,
@@ -93,7 +92,7 @@ class AstAPI:
 
         See AsyncAstAPI.search_ast_nodes for full documentation.
         """
-        return asyncio.run(
+        return run_sync(
             self._async.search_ast_nodes(
                 pdf_data,
                 node_type=node_type,
@@ -114,7 +113,7 @@ class AstAPI:
 
         See AsyncAstAPI.extract_cited_tables for full documentation.
         """
-        return asyncio.run(
+        return run_sync(
             self._async.extract_cited_tables(
                 pdf_data,
                 page_range=page_range,
@@ -131,6 +130,4 @@ class AstAPI:
 
         See AsyncAstAPI.get_ast_diff for full documentation.
         """
-        return asyncio.run(
-            self._async.get_ast_diff(original_pdf_data, modified_pdf_data)
-        )
+        return run_sync(self._async.get_ast_diff(original_pdf_data, modified_pdf_data))

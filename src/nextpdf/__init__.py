@@ -1,4 +1,4 @@
-"""NextPDF Python SDK - The PDF Runtime for AI Agents."""
+"""NextPDF Python SDK - Citation-ready PDF extraction for AI agents."""
 
 from ._async_client import AsyncNextPDF
 from ._client import NextPDF

@@ -2,6 +2,26 @@
 
 All notable changes to the NextPDF Python SDK are documented here.
 
+## [1.0.0] — 2026-04-01
+
+### Added
+- CLI tool (`nextpdf` command) with `extract text`, `extract tables`, `ast`, `info`, `version` commands
+- MCP server for AI agent integration (Claude Code, etc.) via `pip install nextpdf[mcp]`
+- Local PDF extraction backend using pypdf (beta) -- works offline without remote server
+- Backend protocol abstraction (`PdfBackend`) for pluggable extraction engines
+- `python -m nextpdf` module runner
+- Connection pooling via persistent httpx.AsyncClient
+- Event-loop-safe sync wrapper (works in Jupyter, FastAPI)
+
+### Changed
+- Refactored remote HTTP client into `RemoteBackend` class
+- Dynamic User-Agent header (tracks actual SDK version)
+- Removed hardcoded pricing URLs from error messages
+
+### Removed
+- Unused `DEFAULT_RETRIES` constant
+- Commercial/upgrade language from error messages
+
 ## [0.3.0] — 2026-03-31
 
 ### Added (Phase 2a)
