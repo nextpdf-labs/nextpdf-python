@@ -53,6 +53,16 @@ Repository = "https://github.com/nextpdf-labs/nextpdf-python"
 Changelog = "https://github.com/nextpdf-labs/nextpdf-python/blob/main/CHANGELOG.md"
 Issues = "https://github.com/nextpdf-labs/nextpdf-python/issues"
 
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "mypy>=1.11",
+    "ruff>=0.6",
+    "pyright>=1.1",
+    "respx>=0.21",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/nextpdf"]
 
