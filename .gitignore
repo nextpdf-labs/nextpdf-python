@@ -21,6 +21,12 @@ env/
 # pytest
 .pytest_cache/
 
+# Linters
+.ruff_cache/
+
+# Generic temp workspaces
+.tmp-*/
+
 # IDE
 .idea/
 .vscode/
