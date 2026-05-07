@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nextpdf"
-version = "1.0.0"
+version = "1.1.0"
 description = "Citation-ready PDF extraction for Python - AI-agent-native"
 readme = "README.md"
 license = { text = "MIT" }
@@ -53,6 +53,7 @@ dev = [
     "ruff>=0.6",
     "pyright>=1.1",
     "respx>=0.21",
+    "cyclonedx-bom>=4.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -81,3 +82,22 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+# ---------------------------------------------------------------------------
+# CycloneDX SBOM generation
+# RAG anchor: cyclonedx_1_7_json_reference#x1.x65.x8.p24
+#   — version MUST comply with semantic versioning
+#   — specVersion MUST be "1.7" for CDX 1.7 schema validity
+#
+# Usage:
+#   python -m cyclonedx_py environment --output-format JSON \
+#       --schema-version 1.7 \
+#       --outfile sbom-1.1.0.cdx.json
+#
+# Filename convention: sbom-{version}.cdx.json
+# This aligns with ArtifactNamer::sbomFile() in the PHP Premium repo (C1 pair).
+# ---------------------------------------------------------------------------
+[tool.cyclonedx]
+schema_version = "1.7"
+output_format = "JSON"
+output_file_pattern = "sbom-{version}.cdx.json"
