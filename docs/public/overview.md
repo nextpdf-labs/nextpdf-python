@@ -55,7 +55,7 @@ Use the SDK when your pipeline needs to answer questions like "which page did th
 
 The remote backend sends PDF bytes to a NextPDF Connect server. This is the recommended production path because it centralizes extraction behavior, authentication, quotas, and operational controls.
 
-The local backend runs inside the Python process and reads PDFs through `pypdf`. It is useful for offline development and tagged PDFs, but it cannot provide precise bounding boxes and uses heuristic paragraph-level extraction for untagged PDFs. The local backend is library-only: you reach it by injecting a `LocalBackend` into `AsyncNextPDF`, and the `nextpdf` CLI and the MCP server cannot use it. See [Backend choice matrix](#backend-choice-matrix) for the full comparison.
+The local backend runs inside the Python process and reads PDFs through `pypdf`. It is useful for offline development and tagged PDFs. But it cannot provide precise bounding boxes and uses heuristic paragraph-level extraction for untagged PDFs. The local backend is library-only: you reach it by injecting a `LocalBackend` into `AsyncNextPDF`. The `nextpdf` CLI and the MCP server cannot use it. See [Backend choice matrix](#backend-choice-matrix) for the full comparison.
 
 ## Limitations
 
@@ -76,9 +76,9 @@ Both clients share one `ast` method namespace and return the same Pydantic model
 | FastAPI, Starlette, ASGI | `AsyncNextPDF` | Shares the request event loop and the same connection pool. |
 | High-concurrency fan-out | `AsyncNextPDF` | Run many extractions concurrently with `asyncio.gather` over one pooled client. |
 
-`NextPDF` wraps an internal `AsyncNextPDF` and runs each call through `run_sync`. Inside a running event loop (for example, a notebook), `run_sync` dispatches the coroutine to a single-worker thread with its own loop, so you do not hit the nested-`asyncio.run` error. In an `asyncio` or ASGI service, call `AsyncNextPDF` directly instead of paying for that thread hand-off on every call.
+`NextPDF` wraps an internal `AsyncNextPDF` and runs each call through `run_sync`. Inside a running event loop (for example, a notebook), `run_sync` dispatches the coroutine to a single-worker thread with its own loop. So you do not hit the nested-`asyncio.run` error. In an `asyncio` or ASGI service, call `AsyncNextPDF` directly instead of paying for that thread hand-off on every call.
 
-The async client owns an `httpx.AsyncClient` for connection pooling, so reuse one `AsyncNextPDF` instance and close it once. The sync `NextPDF` client does not expose a `close()` method; for long-lived async workloads, prefer `AsyncNextPDF` and manage its lifecycle explicitly (see [Production operational model](#production-operational-model)).
+The async client owns an `httpx.AsyncClient` for connection pooling, so reuse one `AsyncNextPDF` instance and close it once. The sync `NextPDF` client does not expose a `close()` method. For long-lived async workloads, prefer `AsyncNextPDF` and manage its lifecycle explicitly (see [Production operational model](#production-operational-model)).
 
 ## Backend choice matrix
 

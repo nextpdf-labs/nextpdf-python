@@ -86,7 +86,7 @@ nextpdf version
 
 The `version` command is the one command that needs neither `--base-url` nor `--api-key`. Every other command contacts the server and requires both.
 
-Each example reads the API key from the `NEXTPDF_API_KEY` environment variable rather than embedding it on the command line. Treat the key as a secret: a literal key on the command line is visible in your shell history and in the process list (`ps`) to other users on the host.
+Each example reads the API key from the `NEXTPDF_API_KEY` environment variable rather than embedding it on the command line. Treat the key as a secret. A literal key on the command line is visible in your shell history and in the process list (`ps`) to other users on the host.
 
 ## Commands and options
 
@@ -429,7 +429,7 @@ The `-` argument tells the command to read the document from stdin. If no bytes 
 
 ## Performance notes
 
-The CLI builds each response in memory and writes it once, so redirecting or piping output is straightforward, but the output is not produced incrementally — a large AST or table set is fully buffered before the first byte reaches stdout or the `--output` file. Plan memory and latency for whole-document responses, not for a stream.
+The CLI builds each response in memory and writes it once, so redirecting or piping output is straightforward, but the output is not produced incrementally. A large AST or table set is fully buffered before the first byte reaches stdout or the `--output` file. Plan memory and latency for whole-document responses, not for a stream.
 
 Each `nextpdf` invocation creates a fresh client and HTTP connection, so a loop over many files opens and closes a connection per file. The connection cost is usually small next to server-side extraction time, but it is real overhead at scale.
 

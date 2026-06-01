@@ -82,7 +82,7 @@ this with `python -m nextpdf`, which runs the command-line interface (CLI), not
 the MCP server.
 
 `NEXTPDF_BASE_URL` and `NEXTPDF_API_KEY` are both required. The server builds
-its client lazily on the first tool call; if either variable is empty it raises
+its client lazily on the first tool call. If either variable is empty it raises
 a `RuntimeError` that is returned to the agent as a tool error rather than
 crashing the process.
 
@@ -165,7 +165,7 @@ Practical guidance for agent integrations:
   `page_start` and `page_end` on the extraction tools.
 - **Quota and backoff.** On a 429, the tool returns `error_type` of
   `QuotaExceededError` with `status_code` 429. The `retry_after` value lives on
-  the exception object; because the server serializes only `error`,
+  the exception object. Because the server serializes only `error`,
   `error_type`, and `status_code`, the agent should treat 429 as a signal to
   pause and retry later rather than parsing a retry header from the tool output.
   Enforce quotas at the Connect endpoint, not in the agent.
@@ -239,7 +239,7 @@ endpoint are correct and the matching MCP tools will work.
 To drive the MCP protocol directly, use the upstream MCP Inspector (shipped with
 the `mcp` package). Point it at the same command and environment your agent will
 use, then list and invoke tools by hand. Verify that `nextpdf_health` reports
-`status: "ok"` — it returns `misconfigured` whenever `NEXTPDF_BASE_URL` or
+`status: "ok"`. It returns `misconfigured` whenever `NEXTPDF_BASE_URL` or
 `NEXTPDF_API_KEY` is unset, which is the quickest way to catch a missing
 environment value before an agent ever calls a real tool.
 
